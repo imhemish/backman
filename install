@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+from os import popen as pp
+import shutil
+from os import mkdir
+from os.path import expanduser as exp
+
+user = pp("whoami").read().rstrip()
+if user == "root":
+    mkdir("/usr/share/licenses/backman")
+    shutil.copy("LICENSE", "/usr/share/licenses/backman/LICENSE")
+    shutil.copy("backman", "/usr/local/bin/backman")
+else:
+    shutil.copy("backman", exp("~/.local/bin/backman"))
