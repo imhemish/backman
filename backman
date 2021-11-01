@@ -67,7 +67,7 @@ def set_bg(path):
     pp(["setsid", "swaybg", "-i", path])
 
 def change_mode(mode):
-    if mode in ["fixed", "random"]:
+    if str(mode) in ["fixed", "random"]:
         config = read_configs()
         config["mode"] = mode
         save_configs(config)
@@ -79,16 +79,16 @@ def set_fix_bg(path):
         save_configs(config)
 
 def add_directory(path):
-    if exists(path):
+    if exists(str(path)):
         config = read_configs()
-        config["directories"] = config["directories"] + [path,]
+        config["directories"] = config["directories"] + [str(path),]
         save_configs(config)
 
 def remove_directory(path):
     config = read_configs()
-    if path in config["directories"]:
+    if str(path) in config["directories"]:
         list_directories = config["directories"]
-        list.remove(path)
+        list_directories.remove(str(path))
         config["directories"] = list_directories
         save_configs(config)
 
@@ -100,19 +100,40 @@ def return_img_to_set():
         return pick_random(config["directories"])
 
 def set():
-    set_bg(return_img_to_set)
+    set_bg(return_img_to_set())
 
 def main():
     ap = argvp(description="Set backgrounds in sway and other wlroot based compositors, either random background image or fixed")
     ap.add_argument("--set", "-s", action="store_true", required=False, help="Set the background, either random or fixed (as specified in configuration)")
-    ap.add_argument("--return", "-r", action="store_true", required=False, help="Return the path of background that would be set, either random or fixed")
+    ap.add_argument("--return-path", "-r", action="store_true", required=False, help="Return the path of background that would be set, either random or fixed")
     ap.add_argument("--change-mode", "-m", required=False, nargs=1)
     ap.add_argument("--set-fix-bg", "-i", required=False, nargs=1)
     ap.add_argument("--add-dir", required=False, nargs=1)
     ap.add_argument("--rm-dir", required=False, nargs=1)
     args = ap.parse_args()
 
-check_configs(template_config)
+    check_configs(template_config)
+    
+    if args.change_mode != None:
+        change_mode(args.change_mode[0])
+    if args.set_fix_bg != None:
+        set_fix_bg(args.set_fix_bg[0])
+    if args.add_dir != None:
+        add_directory(args.add_dir[0])
+    if args.rm_dir != None:
+        remove_directory(args.rm_dir[0])
+
+    if args.return_path == True and args.set == True:
+        to_return = return_img_to_set()
+        print(to_return)
+        set_bg(to_return)
+    else:
+        if args.return_path == True:
+            print(return_img_to_set())
+        elif args.set == True:
+            set()
+
+    exit()
 
 
 
