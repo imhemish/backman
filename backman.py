@@ -104,12 +104,17 @@ def set():
 
 def main():
     ap = argvp(description="Set backgrounds in sway and other wlroot based compositors, either random background image or fixed")
-    ap.add_argument("--set", "-s", required=False, help="Set the background, either random or fixed (as specified in configuration)")
-    ap.add_argument("--return", "-r", required=False, help="Return the path of background that would be set, either random or fixed")
+    ap.add_argument("--set", "-s", action="store_true", required=False, help="Set the background, either random or fixed (as specified in configuration)")
+    ap.add_argument("--return", "-r", action="store_true", required=False, help="Return the path of background that would be set, either random or fixed")
     ap.add_argument("--change-mode", "-m", required=False, nargs=1)
     ap.add_argument("--set-fix-bg", "-i", required=False, nargs=1)
     ap.add_argument("--add-dir", required=False, nargs=1)
     ap.add_argument("--rm-dir", required=False, nargs=1)
+    args = ap.parse_args()
+
+check_configs(template_config)
+
+
 
 if __name__ == "__main__":
     main()
