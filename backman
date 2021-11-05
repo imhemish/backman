@@ -7,44 +7,61 @@ from toml import load, dump
 from os.path import expanduser as exp
 import os
 from argparse import ArgumentParser as argvp
+import sys
 
 template_config = {
         "mode": "random", # Other is fixed
-        "directories": ["",],
-        "fix_bg": ""
+        "directories": ["/usr/share/backman",],
+        "fix_bg": "/usr/share/backman/fix_bg.png"
         }
+
+def warn(message):
+    sys.stderr.write("Warning: {} \n".format(message))
 
 # Dump configs if dont exist
 def check_configs(template_config):
     if not exists(exp("~/.config/backman.toml")):
+        warn("Configuration does not exist. Dumping default configuration. Edit as required.")
         filenew = open(exp("~/.config/backman.toml"), "a")
         dump(template_config, filenew)
         filenew.close()
 
 # Read Configs
 def read_configs():
-    return load(exp("~/.config/backman.toml"))
+    try:
+        return load(exp("~/.config/backman.toml"))
+    except:
+        warn("Configuration could not be read correctly. Using default values")
+        return template_config()
 
 def save_configs(config_dict):
-    filenew = open(exp("~/.config/backman.toml"), "w")
-    dump(config_dict, filenew)
-    filenew.close()
+    try:
+        filenew = open(exp("~/.config/backman.toml"), "w")
+        dump(config_dict, filenew)
+        filenew.close()
+    except Exception as e:
+        warn("Exception occured in saving configuration")
+        warn("The exception was: {}".format(e))
+        exit()
 
 def get_list_of_files(dirName):
+    if exists(dirName):
     # create a list of file and sub directories 
     # names in the given directory 
-    listOfFile = os.listdir(dirName)
-    allFiles = list()
+        listOfFile = os.listdir(dirName)
+        allFiles = list()
     # Iterate over all the entries
-    for entry in listOfFile:
+        for entry in listOfFile:
         # Create full path
-        fullPath = os.path.join(dirName, entry)
+            fullPath = os.path.join(dirName, entry)
         # If entry is a directory then get the list of files in this directory 
-        if os.path.isdir(fullPath):
-            allFiles = allFiles + getListOfFiles(fullPath)
-        else:
-            allFiles.append(fullPath)
-                
+            if os.path.isdir(fullPath):
+                allFiles = allFiles + getListOfFiles(fullPath)
+            else:
+                allFiles.append(fullPath)
+    else:
+        warn("The directory '{}' does not exist.".format(dirName))
+        return []
     return allFiles        
 
 def is_image(filepath):
@@ -56,22 +73,42 @@ def is_image(filepath):
 def pick_random(directories_list):
     from random import choice
 
+    if len(directories_list) == 0:
+        warn("No directories specified. Exiting...")
+        exit()
+
     imgs_list = []
     for item in directories_list:
-        imgs = list(filter(is_image, get_list_of_files(item)))
-        imgs_list = imgs_list + imgs
+        if exists(item) and item != 0:
+            imgs = list(filter(is_image, get_list_of_files(item)))
+            imgs_list = imgs_list + imgs
+        else:
+            warn("Directory does not exist: '{}'".format(item))
+
+    if len(imgs_list) == 0:
+        warn("No image detected. Exiting...")
+        exit()
 
     return choice(imgs_list)
 
-def set_bg(path):
-    os.system("pkill swaybg")
-    pp(["swaybg", "-i", path], close_fds=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+def cmd(cmd_list):
+    pp(cmd_list, close_fds=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 def change_mode(mode):
     if str(mode) in ["fixed", "random"]:
         config = read_configs()
         config["mode"] = mode
         save_configs(config)
+
+def toggle_mode():
+    config = read_configs()
+    if config["mode"] == "fixed":
+        config["mode"] = "random"
+    elif config["mode"] == "random":
+        config["mode"] = "fixed"
+    else:
+        warn("There was a problem parsing mode in configuration")
+    save_configs(config)
 
 def set_fix_bg(path):
     if exists(path):
@@ -93,6 +130,46 @@ def remove_directory(path):
         config["directories"] = list_directories
         save_configs(config)
 
+def set_bg(path):
+    try:
+        xdg_cd = os.environ["XDG_CURRENT_DESKTOP"]
+    except:
+        try:
+            xdg_cd = os.environ["XDG_SESSION_DESKTOP"]
+        except:
+            xdg_cd = "dummy"
+    try:
+        xdg_ses = os.environ["XDG_SESSION_TYPE"]
+    except:
+        xdg_ses = "dummy"
+    if "gnome" in xdg_cd.lower():
+        cmd(["gsettings", "set", "org.gnome.desktop.background", "picture-uri", "file://{}".format(path)])
+    elif "cinnamon" in xdg_cd.lower():
+        cmd(["gsettings", "set", "org.cinnamon.desktop.background", "picture-uri", "file://{}".format(path)])
+    elif "xfce" in xdg_cd.lower():
+        os.system("pathn={} /usr/share/backman/set_xfce".format(return_img_to_set()))
+    elif "sway" in xdg_cd.lower():
+        os.system("pkill swaybg")
+        cmd(["swaybg", "-i", path])
+    elif xdg_ses.lower() == "wayland":
+        warn("Wayland detected but not sway. Using swaybg...")
+        os.system("pkill swaybg")
+        cmd(["swaybg", "-i", path])
+    elif xdg_ses.lower() == "x11":
+        cmd(["hsetroot", "-fill", path])
+    elif xdg_ses.lower() == "tty":
+        warn("Either graphical session is not running or appropriate XDG_SESSION_TYPE variable is not set")
+        warn("Using hsetroot in tty environment")
+        cmd(["hsetroot", "-fill", path])
+    else:
+        warn("Platform not supported")
+
+def list_dirs():
+    config = read_configs()
+    list_directories = config["directories"]
+    for item in list_directories:
+        print(item)
+
 def return_img_to_set():
     config = read_configs()
     if config["mode"] == "fixed":
@@ -104,19 +181,24 @@ def set():
     set_bg(return_img_to_set())
 
 def main():
-    ap = argvp(description="Set backgrounds in sway and other wlroot based compositors, either random background image or fixed")
+    ap = argvp(description="Backman is a random/fixed background image setter for major GTK desktops, X11, sway and other wlroots based wayland compositors")
     ap.add_argument("--set", "-s", action="store_true", required=False, help="Set the background, either random or fixed (as specified in configuration)")
     ap.add_argument("--return-path", "-r", action="store_true", required=False, help="Return the path of background that would be set, either random or fixed")
-    ap.add_argument("--change-mode", "-m", required=False, nargs=1)
-    ap.add_argument("--set-fix-bg", "-i", required=False, nargs=1)
-    ap.add_argument("--add-dir", required=False, nargs=1)
-    ap.add_argument("--rm-dir", required=False, nargs=1)
+    ap.add_argument("--change-mode", "-m", required=False, nargs=1, help="Change mode to specified as arguement")
+    ap.add_argument("--set-fix-bg", "-i", required=False, nargs=1, help="Set fixed background image in configuration")
+    ap.add_argument("--add-dir", required=False, nargs=1, help="Add a directory to configuration")
+    ap.add_argument("--rm-dir", required=False, nargs=1, help="Remove a directory from configuration")
+    ap.add_argument("--list-dirs", "-l", action="store_true", required=False, help="List directories specified in configuration")
+    ap.add_argument("--toggle-mode", "-t", action="store_true", required=False, help="Toggle modes between fixed and random")
+    
     args = ap.parse_args()
 
     check_configs(template_config)
     
     if args.change_mode != None:
         change_mode(args.change_mode[0])
+    if args.toggle_mode == True:
+        toggle_mode()
     if args.set_fix_bg != None:
         set_fix_bg(args.set_fix_bg[0])
     if args.add_dir != None:
@@ -129,11 +211,13 @@ def main():
         print(to_return)
         set_bg(to_return)
     else:
-        if args.return_path == True:
+        if args.return_path:
             print(return_img_to_set())
-        elif args.set == True:
+        elif args.set:
             set()
 
+    if args.list_dirs:
+        list_dirs()
     exit()
 
 

@@ -6,8 +6,18 @@ from os.path import expanduser as exp
 
 user = pp("whoami").read().rstrip()
 if user == "root":
-    mkdir("/usr/share/licenses/backman")
-    shutil.copy("LICENSE", "/usr/share/licenses/backman/LICENSE")
+    try:
+        mkdir("/usr/local/share/licenses/backman")
+    except:
+        pass
+    try:
+        mkdir("/usr/local/share/backman")
+    except:
+        pass
+
+    shutil.copy("LICENSE", "/usr/local/share/licenses/backman/LICENSE")
     shutil.copy("backman", "/usr/local/bin/backman")
+    shutil.copy("fix_bg.png", "/usr/local/share/backman/fix_bg.png")
+    shutil.copy("set_xfce", "/usr/local/share/backman/set_xfce")
 else:
-    shutil.copy("backman", exp("~/.local/bin/backman"))
+    print("Root/superuser permissions required")
