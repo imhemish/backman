@@ -35,26 +35,32 @@ fix_bg = "/home/cat/pix/bg/btwarch-black.png"
 Also note that you can also change these configurations without actually editing the configuration file, itself inside the program. See usage for knowing how.   
 
 # Usage
-usage: backman [-h] [--set] [--return-path] [--change-mode CHANGE_MODE] [--set-fix-bg SET_FIX_BG][--add-dir ADD_DIR]    
-               [--rm-dir RM_DIR] [--list-dirs] [--toggle-mode]     
-    
-Backman is a random/fixed background image setter for major GTK desktops, X11, sway and other wlroots based wayland compositors    
-    
-optional arguments:    
-  -h, --help            show this help message and exit    
-  --set, -s             Set the background, either random or fixed (as specified in configuration)   
-  --return-path, -r     Return the path of background that would be set, either random or fixed   
-  --change-mode CHANGE_MODE, -m CHANGE_MODE   
-                        Change mode to specified as arguement   
-  --set-fix-bg SET_FIX_BG, -i SET_FIX_BG   
-                        Set fixed background image in configuration   
-  --add-dir ADD_DIR     Add a directory to configuration   
-  --rm-dir RM_DIR       Remove a directory from configuration   
-  --list-dirs, -l       List directories specified in configuration   
-  --toggle-mode, -t     Toggle modes between fixed and random   
+```
+usage: backman [-h] [--set] [--return-path] [--wal] [--change-mode mode] [--set-fix-bg /path/to/file]
+               [--add-dir path/to/directory] [--rm-dir path/to/directory] [--list-dirs] [--toggle-mode]
 
+Backman is a random/fixed background image setter for major GTK desktops, X11, sway and other wlroots based wayland
+compositors
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --set, -s             Set the background, either random or fixed (as specified in configuration)
+  --return-path, -r     Return the path of background that would be set, either random or fixed
+  --wal, -w             Use wal to generate color schemes using returned/set background
+  --change-mode mode, -m mode
+                        Change mode to specified as arguement
+  --set-fix-bg /path/to/file, -i /path/to/file
+                        Set fixed background image in configuration
+  --add-dir path/to/directory
+                        Add a directory to configuration
+  --rm-dir path/to/directory
+                        Remove a directory from configuration
+  --list-dirs, -l       List directories specified in configuration
+  --toggle-mode, -t     Toggle modes between fixed and random
+```   
 - The --set flag instructs the program to set the background (either fixed or random, as specified in configuration)
-- The --return-path flag instructs the program to return the path of background image to be set (either fixed or random, as specified in configuration)
+- The --return-path flag instructs the program to return the path of background image to be set (either fixed or random, as specified in configuration)   
+- The --wal flag instructs the program to also generate color schemes using Wal and returned/set background
 - The --change-mode parameter can change the modes between fixed and random   
  For example, to change the mode to fixed, you can execute:   
 ```bash
