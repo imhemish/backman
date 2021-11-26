@@ -8,6 +8,8 @@ Backman is tested to work on i3, sway, GNOME (Wayland), GNOME (Xorg), Cinnamon, 
 The program depends on swaybg, python3-toml (or python-toml), python3, hsetroot, bash
 
 # Installation:
+Arch Linux and Debian packages have been provided in releases section of Github.    
+To install from source:   
 Meet the required dependencies and run the provided "install" script like this:   
 ```bash
 sudo ./install   
@@ -15,7 +17,7 @@ sudo ./install
 Prepending the install script with "sudo" or executing in super user environment is required.
   
 If you are using Arch Linux, there is an AUR package, called "backman". You can install by cloning or using an AUR helper.  
-   
+If you are using Debian and are familiar with Makedeb Package Repository, there is a package there, called "backman". You can install by cloning or using helper.    
 # Configuration
 The configuration for backman resides at ~/.config/backman.toml The configuration follows the toml markup. The configuration contains three options:
 - mode: this parameter can have two values, "fixed" and "random". The "fixed" option is used to have a single image as your background. The "random" option picks a random picture from your specified directories (defined in next configuration paratemer)   

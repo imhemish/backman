@@ -9,9 +9,9 @@ arch=("x86_64")
 url="https://github.com/securearth/backman"
 license=('MIT')
 depends=(
-		"python>=3.5"
+		"python3>=3.5"
 		"swaybg"
-		"python-toml"
+		"python3-toml"
 		"hsetroot"
         "bash"
 		)

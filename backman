@@ -169,7 +169,7 @@ def is_wal_present():
         return True
     elif exists("/usr/local/bin/wal"):
         return True
-    elif exists(expanduser("~/.local/bin/wal")):
+    elif exists(exp("~/.local/bin/wal")):
         return True
     else:
         return False
