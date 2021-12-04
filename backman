@@ -12,7 +12,8 @@ import sys
 template_config = {
         "mode": "random", # Other is fixed
         "directories": ["/usr/share/backman",],
-        "fix_bg": "/usr/share/backman/fix_bg.png"
+        "fix_bg": "/usr/share/backman/fix_bg.png",
+        "wal-opts": ["",]
         }
 
 def warn(message):
@@ -175,8 +176,15 @@ def is_wal_present():
         return False
 
 def wal(img):
+    config = read_configs()
     if is_wal_present():
-        cmd(["wal", "-i", img])
+        try:
+            opts = config.wal-opts
+        except:
+            opts = ["",]
+        command = ["wal", "-i", img, "-n"]
+        command = command + opts
+        cmd(command)
     else:
         warn("Wal not present, skipping wal")
 
