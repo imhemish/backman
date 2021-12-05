@@ -33,7 +33,7 @@ def read_configs():
         return load(exp("~/.config/backman.toml"))
     except:
         warn("Configuration could not be read correctly. Using default values")
-        return template_config()
+        return template_config
 
 def save_configs(config_dict):
     try:
@@ -148,7 +148,7 @@ def set_bg(path):
     elif "cinnamon" in xdg_cd.lower():
         cmd(["gsettings", "set", "org.cinnamon.desktop.background", "picture-uri", "file://{}".format(path)])
     elif "xfce" in xdg_cd.lower():
-        os.system("pathn={} /usr/share/backman/set_xfce".format(return_img_to_set()))
+        os.system("pathn={} /usr/share/backman/set_xfce".format(path))
     elif "sway" in xdg_cd.lower():
         os.system("pkill swaybg")
         cmd(["swaybg", "-i", path])
