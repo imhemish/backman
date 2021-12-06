@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-from subprocess import Popen as pp
-import subprocess
-from os import mkdir
-from os.path import exists
-from toml import load, dump
-from os.path import expanduser as exp
+from subprocess import Popen as pp # For running shell commands
+import subprocess # Shell commands
+from os import mkdir # For creating directories if don't exist
+from os.path import exists # To check if required files exist
+from toml import load, dump # To save and load configuration
+from os.path import expanduser as exp # To refer user folders as "~"
 import os
-from argparse import ArgumentParser as argvp
+from argparse import ArgumentParser as argvp # Command line arguement parsing
 import sys
 
+# Template configuration to dump if configuration doesn't exist
 template_config = {
         "mode": "random", # Other is fixed
         "directories": ["/usr/share/backman",],
@@ -16,6 +17,7 @@ template_config = {
         "wal-opts": ["",]
         }
 
+# Warning of errors, piped to STDERR
 def warn(message):
     sys.stderr.write("Warning: {} \n".format(message))
 
@@ -27,7 +29,7 @@ def check_configs(template_config):
         dump(template_config, filenew)
         filenew.close()
 
-# Read Configs
+# Reading Configs
 def read_configs():
     try:
         return load(exp("~/.config/backman.toml"))
@@ -35,6 +37,7 @@ def read_configs():
         warn("Configuration could not be read correctly. Using default values")
         return template_config
 
+# Save configuration as specified in provided dictionary
 def save_configs(config_dict):
     try:
         filenew = open(exp("~/.config/backman.toml"), "w")
@@ -45,6 +48,7 @@ def save_configs(config_dict):
         warn("The exception was: {}".format(e))
         exit()
 
+# Get all files under folder and subfolders
 def get_list_of_files(dirName):
     if exists(dirName):
     # create a list of file and sub directories 
@@ -65,12 +69,14 @@ def get_list_of_files(dirName):
         return []
     return allFiles        
 
+# Check if a file is supported image or not
 def is_image(filepath):
     exts = ["png", "jpg", "jpeg"]
     for item in exts:
         if filepath.endswith("."+item):
             return True
 
+# Pick random image from specified directories
 def pick_random(directories_list):
     from random import choice
 
@@ -92,15 +98,18 @@ def pick_random(directories_list):
 
     return choice(imgs_list)
 
+# Execute a shell command in background and send STDOUT and STDERR to /dev/null
 def cmd(cmd_list):
     pp(cmd_list, close_fds=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
+# Change to mode specified
 def change_mode(mode):
     if str(mode) in ["fixed", "random"]:
         config = read_configs()
         config["mode"] = mode
         save_configs(config)
 
+# Toggle mode between fixed and random
 def toggle_mode():
     config = read_configs()
     if config["mode"] == "fixed":
@@ -111,18 +120,21 @@ def toggle_mode():
         warn("There was a problem parsing mode in configuration")
     save_configs(config)
 
+# Set the path of fix background image in configuration
 def set_fix_bg(path):
     if exists(path):
         config = read_configs()
         config["fix_bg"] = path
         save_configs(config)
 
+# Add directory to configuration
 def add_directory(path):
     if exists(str(path)):
         config = read_configs()
         config["directories"] = config["directories"] + [str(path),]
         save_configs(config)
 
+# Remove directory from configuration
 def remove_directory(path):
     config = read_configs()
     if str(path) in config["directories"]:
@@ -131,15 +143,16 @@ def remove_directory(path):
         config["directories"] = list_directories
         save_configs(config)
 
+# Set background accordingly to the platform
 def set_bg(path):
-    try:
+    try: # Getting the current desktop if such env variable is set
         xdg_cd = os.environ["XDG_CURRENT_DESKTOP"]
     except:
-        try:
+        try: # Getting current session as launched by display manager (e.g. GDM, LightDM) (if set in env var)
             xdg_cd = os.environ["XDG_SESSION_DESKTOP"]
         except:
             xdg_cd = "dummy"
-    try:
+    try: # Check if it is wayland or x11 session
         xdg_ses = os.environ["XDG_SESSION_TYPE"]
     except:
         xdg_ses = "dummy"
@@ -147,25 +160,25 @@ def set_bg(path):
         cmd(["gsettings", "set", "org.gnome.desktop.background", "picture-uri", "file://{}".format(path)])
     elif "cinnamon" in xdg_cd.lower():
         cmd(["gsettings", "set", "org.cinnamon.desktop.background", "picture-uri", "file://{}".format(path)])
-    elif "xfce" in xdg_cd.lower():
+    elif "xfce" in xdg_cd.lower(): # The script exists at /usr/share/backman/set_xfce which takes "pathn" as env var
         os.system("pathn={} /usr/share/backman/set_xfce".format(path))
     elif "sway" in xdg_cd.lower():
-        os.system("pkill swaybg")
+        os.system("pkill swaybg") # Kill any running swaybg process, otherwise background wouldn't be set
         cmd(["swaybg", "-i", path])
     elif xdg_ses.lower() == "wayland":
         warn("Wayland detected but not sway. Using swaybg...")
         os.system("pkill swaybg")
         cmd(["swaybg", "-i", path])
-    elif xdg_ses.lower() == "x11":
+    elif xdg_ses.lower() == "x11": # Use hsetroot if any desktop is not detected in Xorg session
         cmd(["hsetroot", "-fill", path])
-    elif xdg_ses.lower() == "tty":
+    elif xdg_ses.lower() == "tty": # Happens when you launch a standalone window manager, which don't set XDG_SESSION_TYPE var
         warn("Either graphical session is not running or appropriate XDG_SESSION_TYPE variable is not set")
         warn("Using hsetroot in tty environment")
         cmd(["hsetroot", "-fill", path])
     else:
         warn("Platform not supported")
 
-def is_wal_present():
+def is_wal_present(): # Check if wall binary is present
     if exists("/usr/bin/wal"):
         return True
     elif exists("/usr/local/bin/wal"):
@@ -175,15 +188,15 @@ def is_wal_present():
     else:
         return False
 
-def wal(img):
+def wal(img): 
     config = read_configs()
     if is_wal_present():
         try:
-            opts = config.wal-opts
+            opts = config.wal-opts # getting additional wal options from config
         except:
             opts = ["",]
-        command = ["wal", "-i", img, "-n"]
-        command = command + opts
+        command = ["wal", "-i", img, "-n"] # -n flag instructs to not set background as this script already does that
+        command = command + opts # Additional wal options as specified in configuration
         cmd(command)
     else:
         warn("Wal not present, skipping wal")
@@ -205,6 +218,7 @@ def set():
     set_bg(return_img_to_set())
 
 def main():
+    # Adding arguements to parser
     ap = argvp(description="Backman is a random/fixed background image setter for major GTK desktops, X11, sway and other wlroots based wayland compositors")
     ap.add_argument("--set", "-s", action="store_true", required=False, help="Set the background, either random or fixed (as specified in configuration)")
     ap.add_argument("--return-path", "-r", action="store_true", required=False, help="Return the path of background that would be set, either random or fixed")
@@ -217,6 +231,7 @@ def main():
     ap.add_argument("--toggle-mode", "-t", action="store_true", required=False, help="Toggle modes between fixed and random")
     args = ap.parse_args()
 
+    # Checking if configuration exists. If doesn't exist, then dump the template_config
     check_configs(template_config)
     
     if args.change_mode != None:
