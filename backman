@@ -204,7 +204,14 @@ def wal(img):
         except:
             opts = ["",]
         command = ["wal", "-i", img, "-n"] # -n flag instructs to not set background as this script already does that
-        command = command + opts # Additional wal options as specified in configuration
+        opts_new = []
+        for item in opts:
+            if item == "":
+                continue
+            else:
+                opts_new.append(item)
+
+        command = command + opts_new # Additional wal options as specified in configuration
         cmd(command)
     else:
         warn("Wal not present, skipping wal")
@@ -273,7 +280,7 @@ def main():
         print(to_return)
     if args.set:
         set_bg(to_return)
-    if args.wal:
+    if args.wal != None:
         wal(to_return)
 
 
