@@ -136,6 +136,7 @@ def remove_directory(path):
 
 # Set background in Windows
 def set_windows_bg(path):
+    import ctypes
     uiAction = 20  # SPI_SETDESKWALLPAPER = 0x0014 or 20 in decimal
     uiParam = 0
     pvParam = path
