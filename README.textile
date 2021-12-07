@@ -48,27 +48,28 @@ p. Also note that you can also change these configurations without actually edit
 
 h1. Usage
 
-bc.. usage: backman [-h] [--set] [--return-path] [--wal] [--change-mode mode] [--set-fix-bg /path/to/file]
-               [--add-dir path/to/directory] [--rm-dir path/to/directory] [--list-dirs] [--toggle-mode]
+bc.. usage: backman [-h] [--previous] [--set] [--return-path] [--wal] [--change-mode mode] [--set-fix-bg /path/to/file]
+               [--add-dir path/to/directory] [--rm-dir path/to/directory] [--list-dirs] [--set-temporary /path/to/file]
 
-Backman is a random/fixed background image setter for major GTK desktops, X11, sway and other wlroots based wayland
-compositors
+Backman is a random/fixed background image setter for major GTK desktops, X11, sway and other wlroots based wayland compositors
 
 optional arguments:
   -h, --help            show this help message and exit
+  --previous, -p        Use previous background image in set/return method instead of choosing random
   --set, -s             Set the background, either random or fixed (as specified in configuration)
   --return-path, -r     Return the path of background that would be set, either random or fixed
   --wal, -w             Use wal to generate color schemes using returned/set background
   --change-mode mode, -m mode
                         Change mode to specified as arguement
-  --set-fix-bg /path/to/file, -i /path/to/file
+  --set-fix-bg /path/to/file, -f /path/to/file
                         Set fixed background image in configuration
   --add-dir path/to/directory
                         Add a directory to configuration
   --rm-dir path/to/directory
                         Remove a directory from configuration
   --list-dirs, -l       List directories specified in configuration
-  --toggle-mode, -t     Toggle modes between fixed and random
+  --set-temporary /path/to/file, -i /path/to/file
+                        Set temporary background disregarding any configuration
 
 p. Explaination:
 

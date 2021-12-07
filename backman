@@ -230,15 +230,24 @@ def main():
     ap.add_argument("--return-path", "-r", action="store_true", required=False, help="Return the path of background that would be set, either random or fixed")
     ap.add_argument("--wal", "-w", action="store_true", required=False, help="Use wal to generate color schemes using returned/set background")
     ap.add_argument("--change-mode", "-m", required=False, nargs=1, help="Change mode to specified as arguement", metavar="mode")
-    ap.add_argument("--set-fix-bg", "-i", required=False, nargs=1, help="Set fixed background image in configuration", metavar="/path/to/file")
+    ap.add_argument("--set-fix-bg", "-f", required=False, nargs=1, help="Set fixed background image in configuration", metavar="/path/to/file")
     ap.add_argument("--add-dir", required=False, nargs=1, help="Add a directory to configuration", metavar="path/to/directory")
     ap.add_argument("--rm-dir", required=False, nargs=1, help="Remove a directory from configuration", metavar="path/to/directory")
     ap.add_argument("--list-dirs", "-l", action="store_true", required=False, help="List directories specified in configuration")
+    ap.add_argument("--set-temporary", "-i", required=False, nargs=1, help="Set temporary background disregarding any configuration", metavar="/path/to/file")
     args = ap.parse_args()
 
     # Checking if configuration exists. If doesn't exist, then dump the template_config
     check_configs(template_config)
     configs= read_configs()
+
+    if args.set_temporary != None:
+        to_set = args.set_temporary[0]
+        if exists(to_set):
+            set_bg(to_set)
+        else:
+            warn("Specified image path does not exist. Skipping...")
+
 
     if args.change_mode != None:
         change_mode(args.change_mode[0])
