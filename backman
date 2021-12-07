@@ -15,7 +15,7 @@ template_config = {
         "mode": "random", # Other modes: bing, unsplash, fixed
         "directories": ["/usr/share/backman",],
         "fix_bg": "/usr/share/backman/fix_bg.png",
-        "wal-opts": ["",],
+        "wal_opts": ["",],
         "prev_bg": "/usr/share/backman/fix_bg.png"
         }
 
@@ -200,7 +200,7 @@ def wal(img):
     config = read_configs()
     if is_wal_present():
         try:
-            opts = config.wal-opts # getting additional wal options from config
+            opts = config["wal_opts"] # getting additional wal options from config
         except:
             opts = ["",]
         command = ["wal", "-i", img, "-n"] # -n flag instructs to not set background as this script already does that
@@ -210,7 +210,6 @@ def wal(img):
                 continue
             else:
                 opts_new.append(item)
-
         command = command + opts_new # Additional wal options as specified in configuration
         cmd(command)
     else:
@@ -280,7 +279,7 @@ def main():
         print(to_return)
     if args.set:
         set_bg(to_return)
-    if args.wal != None:
+    if args.wal:
         wal(to_return)
 
 
