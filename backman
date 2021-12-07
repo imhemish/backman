@@ -109,17 +109,6 @@ def change_mode(mode):
         config["mode"] = mode
         save_configs(config)
 
-# Toggle mode between fixed and random
-def toggle_mode():
-    config = read_configs()
-    if config["mode"] == "fixed":
-        config["mode"] = "random"
-    elif config["mode"] == "random":
-        config["mode"] = "fixed"
-    else:
-        warn("There was a problem parsing mode in configuration")
-    save_configs(config)
-
 # Set the path of fix background image in configuration
 def set_fix_bg(path):
     if exists(path):
@@ -143,40 +132,53 @@ def remove_directory(path):
         config["directories"] = list_directories
         save_configs(config)
 
+# Set background in Windows
+def set_windows_bg(path):
+    uiAction = 20  # SPI_SETDESKWALLPAPER = 0x0014 or 20 in decimal
+    uiParam = 0
+    pvParam = path
+    fWinIni = 0
+    success = ctypes.windll.user32.SystemParametersInfoW(uiAction, uiParam, pvParam, fWinIni)
+    if not success:
+        warn("Some error occured while setting windows background")
+
 # Set background accordingly to the platform
 def set_bg(path):
-    try: # Getting the current desktop if such env variable is set
-        xdg_cd = os.environ["XDG_CURRENT_DESKTOP"]
-    except:
-        try: # Getting current session as launched by display manager (e.g. GDM, LightDM) (if set in env var)
-            xdg_cd = os.environ["XDG_SESSION_DESKTOP"]
+    if sys.platform == "win32":
+        set_windows_bg(path)
+    elif "linux" in sys.platform:
+        try: # Getting the current desktop if such env variable is set
+            xdg_cd = os.environ["XDG_CURRENT_DESKTOP"]
         except:
-            xdg_cd = "dummy"
-    try: # Check if it is wayland or x11 session
-        xdg_ses = os.environ["XDG_SESSION_TYPE"]
-    except:
-        xdg_ses = "dummy"
-    if "gnome" in xdg_cd.lower():
-        cmd(["gsettings", "set", "org.gnome.desktop.background", "picture-uri", "file://{}".format(path)])
-    elif "cinnamon" in xdg_cd.lower():
-        cmd(["gsettings", "set", "org.cinnamon.desktop.background", "picture-uri", "file://{}".format(path)])
-    elif "xfce" in xdg_cd.lower(): # The script exists at /usr/share/backman/set_xfce which takes "pathn" as env var
-        os.system("pathn={} /usr/share/backman/set_xfce".format(path))
-    elif "sway" in xdg_cd.lower():
-        os.system("pkill swaybg") # Kill any running swaybg process, otherwise background wouldn't be set
-        cmd(["swaybg", "-i", path])
-    elif xdg_ses.lower() == "wayland":
-        warn("Wayland detected but not sway. Using swaybg...")
-        os.system("pkill swaybg")
-        cmd(["swaybg", "-i", path])
-    elif xdg_ses.lower() == "x11": # Use hsetroot if any desktop is not detected in Xorg session
-        cmd(["hsetroot", "-fill", path])
-    elif xdg_ses.lower() == "tty": # Happens when you launch a standalone window manager, which don't set XDG_SESSION_TYPE var
-        warn("Either graphical session is not running or appropriate XDG_SESSION_TYPE variable is not set")
-        warn("Using hsetroot in tty environment")
-        cmd(["hsetroot", "-fill", path])
-    else:
-        warn("Platform not supported")
+            try: # Getting current session as launched by display manager (e.g. GDM, LightDM) (if set in env var)
+                xdg_cd = os.environ["XDG_SESSION_DESKTOP"]
+            except:
+                xdg_cd = "dummy"
+        try: # Check if it is wayland or x11 session
+            xdg_ses = os.environ["XDG_SESSION_TYPE"]
+        except:
+            xdg_ses = "dummy"
+        if "gnome" in xdg_cd.lower():
+            cmd(["gsettings", "set", "org.gnome.desktop.background", "picture-uri", "file://{}".format(path)])
+        elif "cinnamon" in xdg_cd.lower():
+            cmd(["gsettings", "set", "org.cinnamon.desktop.background", "picture-uri", "file://{}".format(path)])
+        elif "xfce" in xdg_cd.lower(): # The script exists at /usr/share/backman/set_xfce which takes "pathn" as env var
+            os.system("pathn={} /usr/share/backman/set_xfce".format(path))
+        elif "sway" in xdg_cd.lower():
+            os.system("pkill swaybg") # Kill any running swaybg process, otherwise background wouldn't be set
+            cmd(["swaybg", "-i", path])
+        elif xdg_ses.lower() == "wayland":
+            warn("Wayland detected but not sway. Using swaybg...")
+            os.system("pkill swaybg")
+            cmd(["swaybg", "-i", path])
+        elif xdg_ses.lower() == "x11": # Use hsetroot if any desktop is not detected in Xorg session
+            cmd(["hsetroot", "-fill", path])
+        elif xdg_ses.lower() == "tty": # Happens when you launch a standalone window manager, which don't set XDG_SESSION_TYPE var
+            warn("Either graphical session is not running or appropriate XDG_SESSION_TYPE variable is not set")
+            warn("Using hsetroot in tty environment")
+            cmd(["hsetroot", "-fill", path])
+        else:
+            warn("Platform not supported")
 
 def is_wal_present(): # Check if wall binary is present
     if exists("/usr/bin/wal"):
