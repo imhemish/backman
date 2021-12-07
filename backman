@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Author: Hemish (hemish04082005@gmail.com)
 from subprocess import Popen as pp # For running shell commands
 import subprocess # Shell commands
 from os import mkdir # For creating directories if don't exist
@@ -11,10 +12,11 @@ import sys
 
 # Template configuration to dump if configuration doesn't exist
 template_config = {
-        "mode": "random", # Other is fixed
+        "mode": "random", # Other modes: bing, unsplash, fixed
         "directories": ["/usr/share/backman",],
         "fix_bg": "/usr/share/backman/fix_bg.png",
-        "wal-opts": ["",]
+        "wal-opts": ["",],
+        "prev_bg": "/usr/share/backman/fix_bg.png"
         }
 
 # Warning of errors, piped to STDERR
@@ -144,6 +146,10 @@ def set_windows_bg(path):
 
 # Set background accordingly to the platform
 def set_bg(path):
+    configs = read_configs()
+    configs["prev_bg"] = path
+    save_configs(configs)
+
     if sys.platform == "win32":
         set_windows_bg(path)
     elif "linux" in sys.platform:
@@ -216,12 +222,10 @@ def return_img_to_set():
     elif config["mode"] == "random":
         return pick_random(config["directories"])
 
-def set():
-    set_bg(return_img_to_set())
-
 def main():
     # Adding arguements to parser
     ap = argvp(description="Backman is a random/fixed background image setter for major GTK desktops, X11, sway and other wlroots based wayland compositors")
+    ap.add_argument("--previous", "-p", action="store_true", required=False, help="Use previous background image in set/return method instead of choosing random")
     ap.add_argument("--set", "-s", action="store_true", required=False, help="Set the background, either random or fixed (as specified in configuration)")
     ap.add_argument("--return-path", "-r", action="store_true", required=False, help="Return the path of background that would be set, either random or fixed")
     ap.add_argument("--wal", "-w", action="store_true", required=False, help="Use wal to generate color schemes using returned/set background")
@@ -230,40 +234,40 @@ def main():
     ap.add_argument("--add-dir", required=False, nargs=1, help="Add a directory to configuration", metavar="path/to/directory")
     ap.add_argument("--rm-dir", required=False, nargs=1, help="Remove a directory from configuration", metavar="path/to/directory")
     ap.add_argument("--list-dirs", "-l", action="store_true", required=False, help="List directories specified in configuration")
-    ap.add_argument("--toggle-mode", "-t", action="store_true", required=False, help="Toggle modes between fixed and random")
     args = ap.parse_args()
 
     # Checking if configuration exists. If doesn't exist, then dump the template_config
     check_configs(template_config)
-    
+    configs= read_configs()
+
     if args.change_mode != None:
         change_mode(args.change_mode[0])
-    if args.toggle_mode == True:
-        toggle_mode()
     if args.set_fix_bg != None:
         set_fix_bg(args.set_fix_bg[0])
     if args.add_dir != None:
         add_directory(args.add_dir[0])
     if args.rm_dir != None:
         remove_directory(args.rm_dir[0])
+    
 
-    if args.return_path == True and args.set == True:
-        to_return = return_img_to_set()
-        print(to_return)
-        set_bg(to_return)
-        if args.wal:
-            wal(to_return)
+
+    if args.previous:
+        try:
+            to_return = configs["prev_bg"]
+        except:
+            warn("Some error occured while fetching previously set image. Generating new...")
+            to_return = return_img_to_set()
     else:
-        if args.return_path:
-            to_return = return_img_to_set()
-            print(to_return)
-            if args.wal:
-                wal(to_return)
-        elif args.set:
-            to_return = return_img_to_set()
-            set_bg(to_return)
-            if args.wal:
-                wal(to_return)
+        to_return = return_img_to_set()
+    
+    if args.return_path:
+        print(to_return)
+    if args.set:
+        set_bg(to_return)
+    if args.wal:
+        wal(to_return)
+
+
 
     if args.list_dirs:
         list_dirs()

@@ -17,13 +17,13 @@ p. **Arch Linux (.pkg.tar.zst)** and **Debian packages (.deb)** have been provid
 p. To install from source:
 Meet the required dependencies and run the provided **install** script like this:
 
-bc[python]. sudo ./install
+bc[bash]. sudo ./install
 
 p. Prepending the install script with "sudo" or executing in super user environment is required.
 
 p. If you are using **Arch Linux**, there is an **AUR** package, called **"backman"**. You can install by cloning or using an AUR helper.
 
-p. If you are using Debian and are familiar with Makedeb Package Repository, there is a package there, called "backman". You can install by cloning or using helper.
+p. If you are using **Debian** and are familiar with **Makedeb Package Repository (MPR)**, there is a package there, called **"backman"**. You can install by cloning or using helper.
 
 h1. Configuration
 
@@ -34,13 +34,13 @@ p. The configuration for backman resides at ~/.config/backman.toml The configura
 
 p. Example configuration 1:
 
-bc[python]. mode = "random"
+bc[toml]. mode = "random"
 directories = [ "/home/cat/pix/bg", "/usr/share/backgrounds" ]
 fix_bg = "/home/cat/pix/bg/btwarch-black.png"
 
 p. Example configuration 2:
 
-bc[python]. mode = "fixed"
+bc[toml]. mode = "fixed"
 directories = [ "/home/cat/pix/bg", "/usr/share/backgrounds" ]
 fix_bg = "/home/cat/pix/bg/btwarch-black.png"
 
@@ -78,21 +78,21 @@ p. Explaination:
 * The @--change-mode@ parameter can change the modes between fixed and random
  For example, to change the mode to fixed, you can execute:
 
-bc[python]. backman -m fixed
+bc[bash]. backman -m fixed
 
 p. To change to random, you can execute:
 
-bc[python]. backman -m random
+bc[bash]. backman -m random
 
 * The @--set-fix-bg@ paramter can be used to set the fixed background image for "fixed" mode.
 For example, to set the image: /home/user/Pictures/1.jpg as fixed background image, you can execute:
 
-bc[python]. backman -i /home/user/Pictures/1.jpg
+bc[bash]. backman -i /home/user/Pictures/1.jpg
 
 * The @--add-dir@ and @--rm-dir@ can be respectively used to add and remove directories from directories configuration.   
 For example, to remove "/home/user/Pictures" directory and add "/usr/share/backgrounds" directory, you can execute:   
 
-bc[python]. backman --add-dir /usr/share/backgrounds --rm-dir /home/user/Pictures
+bc[bash]. backman --add-dir /usr/share/backgrounds --rm-dir /home/user/Pictures
 
 * The @--list-dirs@ can be used to list all directories specified in the configuration.
 
@@ -101,13 +101,13 @@ h1. Warnings
 The program prints out warnings to sterr. So, if you want to pipe or use the output of the program's stdout, you would need to send the sterr to /dev/null
 Example:
 
-bc[python]. backman -r 2>/dev/null
+bc[bash]. backman -r 2>/dev/null
 
 h1. Reminder and tip
 
 The background set by this script (or swaybg) is not persistent across logout and logins in standalone window managers. It just disappears after quitting compositor/window manager. To have a persistent feel, add the following command to your autostart script (maybe in your window manager/compositor configuration):
 
-bc[python]. backman -s 2>/dev/null 
+bc[bash]. backman -s 2>/dev/null 
 
 h1. License
 
