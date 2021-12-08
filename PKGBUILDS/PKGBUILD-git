@@ -1,11 +1,12 @@
 # Maintainer: Hemish <hemish04082005@gmail.com>
-pkgname=backman
+pkgname=backman-git
+_pkgname=backman-master
 
-pkgver=0.3.2
-pkgrel=2
+pkgver=0.3.2.11.g3b8449b
+pkgrel=0
 
 pkgdesc="Backman is a random/fixed background image setter for major GTK desktops, X11, sway and other wlroots based wayland compositors"
-arch=("x86_64")
+arch=("any")
 url="https://github.com/securearth/backman"
 license=('MIT')
 depends=(
@@ -13,25 +14,30 @@ depends=(
 		"swaybg"
 		"python-toml"
 		"hsetroot"
-        "bash"
+        	"bash"
 		)
-makedepends=()
+makedepends=("git")
 optdepends=()
-provides=("${pkgname}")
-conflicts=("${pkgname}-git")
+provides=("backman")
+conflicts=("backman")
 replaces=()
 backup=()
 options=()
 install=
 changelog=
-source=("https://github.com/securearth/backman/archive/refs/tags/0.3.2.tar.gz")
+source=("https://github.com/securearth/backman/archive/refs/heads/master.tar.gz")
 noextract=()
 md5sums=("SKIP")
 validpgpkeys=()
 
+pkgver() {
+	cd "${_pkgname}"
+	git describe --long --tags | sed -r 's/-/./g'
+}
+
 package() {
-	cd "${pkgname}-${pkgver}"
-	install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+	cd "${_pkgname}"
+	install -Dm644 LICENSE "$pkgdir/usr/share/licenses/backman/LICENSE"
 	install -Dm755 backman "$pkgdir/usr/bin/backman"
 	install -Dm755 set_xfce "$pkgdir/usr/share/backman/set_xfce"
 	install -Dm 644 fix_bg.png "$pkgdir/usr/share/backman/fix_bg.png"

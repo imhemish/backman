@@ -4,11 +4,25 @@ from subprocess import Popen as pp # For running shell commands
 import subprocess # Shell commands
 from os import mkdir # For creating directories if don't exist
 from os.path import exists # To check if required files exist
+from os.path import join as joinp
 from toml import load, dump # To save and load configuration
 from os.path import expanduser as exp # To refer user folders as "~"
 import os
 from argparse import ArgumentParser as argvp # Command line arguement parsing
 import sys
+from functools import reduce
+
+
+# Some utility functions for paths
+def _(path): # Refer in form of unix paths, and convert to windows one if using Windows, and also replace ~ by the home dir
+    return exp(str(reduce(joinp, path.split("/"))))
+
+def create_dir_if_not_exists(path):
+	if os.path.exists(str(path)) == False:
+		os.mkdir(str(path))
+	else:
+		pass
+
 
 # Template configuration to dump if configuration doesn't exist
 template_config = {
@@ -19,13 +33,17 @@ template_config = {
         "prev_bg": "/usr/share/backman/fix_bg.png"
         }
 
+# If platform is Windows, then use Pictures directory
+if sys.platform == "win32":
+    template_config["directories"] = [_("~/Pictures/")]
+
 # Warning of errors, piped to STDERR
 def warn(message):
     sys.stderr.write("Warning: {} \n".format(message))
 
 # Dump configs if dont exist
 def check_configs(template_config):
-    if not exists(exp("~/.config/backman.toml")):
+    if not exists(_("~/.config/backman.toml")):
         warn("Configuration does not exist. Dumping default configuration. Edit as required.")
         filenew = open(exp("~/.config/backman.toml"), "a")
         dump(template_config, filenew)
@@ -34,7 +52,7 @@ def check_configs(template_config):
 # Reading Configs
 def read_configs():
     try:
-        return load(exp("~/.config/backman.toml"))
+        return load(_("~/.config/backman.toml"))
     except:
         warn("Configuration could not be read correctly. Using default values")
         return template_config
@@ -42,7 +60,7 @@ def read_configs():
 # Save configuration as specified in provided dictionary
 def save_configs(config_dict):
     try:
-        filenew = open(exp("~/.config/backman.toml"), "w")
+        filenew = open(_("~/.config/backman.toml"), "w")
         dump(config_dict, filenew)
         filenew.close()
     except Exception as e:
@@ -188,11 +206,11 @@ def set_bg(path):
             warn("Platform not supported")
 
 def is_wal_present(): # Check if wall binary is present
-    if exists("/usr/bin/wal"):
+    if exists(_("/usr/bin/wal")):
         return True
-    elif exists("/usr/local/bin/wal"):
+    elif exists(_("/usr/local/bin/wal")):
         return True
-    elif exists(exp("~/.local/bin/wal")):
+    elif exists(_("~/.local/bin/wal")):
         return True
     else:
         return False
