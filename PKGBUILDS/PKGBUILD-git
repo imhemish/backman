@@ -1,9 +1,9 @@
 # Maintainer: Hemish <hemish04082005@gmail.com>
 pkgname=backman-git
-_pkgname=backman-master
+_pkgname=backman
 
-pkgver=0.3.2.11.g3b8449b
-pkgrel=0
+pkgver=0.4.0.gdf83968
+pkgrel=1
 
 pkgdesc="Backman is a random/fixed background image setter for major GTK desktops, X11, sway and other wlroots based wayland compositors"
 arch=("any")
@@ -25,7 +25,7 @@ backup=()
 options=()
 install=
 changelog=
-source=("https://github.com/securearth/backman/archive/refs/heads/master.tar.gz")
+source=("git+https://github.com/securearth/backman.git")
 noextract=()
 md5sums=("SKIP")
 validpgpkeys=()
