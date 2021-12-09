@@ -45,7 +45,7 @@ def warn(message):
 def check_configs(template_config):
     if not exists(_("~/.config/backman.toml")):
         warn("Configuration does not exist. Dumping default configuration. Edit as required.")
-        filenew = open(exp("~/.config/backman.toml"), "a")
+        filenew = open(_("~/.config/backman.toml"), "a")
         dump(template_config, filenew)
         filenew.close()
 
