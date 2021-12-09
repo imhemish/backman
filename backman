@@ -15,7 +15,16 @@ from functools import reduce
 
 # Some utility functions for paths
 def _(path): # Refer in form of unix paths, and convert to windows one if using Windows, and also replace ~ by the home dir
-    return exp(str(reduce(joinp, path.split("/"))))
+    p = path
+    if p.startswith("/"):
+        root_path = True
+    else:
+        root_path = False
+
+    p = exp(str(reduce(joinp, p.split("/"))))
+    if root_path:
+        p = "/"+p
+    return p
 
 def create_dir_if_not_exists(path):
 	if os.path.exists(str(path)) == False:
