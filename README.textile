@@ -21,9 +21,9 @@ bc[bash]. sudo ./install
 
 p. Prepending the install script with "sudo" or executing in super user environment is required.
 
-p. If you are using **Arch Linux**, there is an **AUR** package, called **"backman"**. You can install by cloning or using an AUR helper.
+p. If you are using **Arch Linux**, there is an **AUR** package, called **"backman-git"**. You can install by cloning or using an AUR helper.
 
-p. If you are using **Debian** and are familiar with **Makedeb Package Repository (MPR)**, there is a package there, called **"backman"**. You can install by cloning or using helper.
+p. If you are using **Debian** and are familiar with **Makedeb Package Repository (MPR)**, there is a package there, called **"backman-git"**. You can install by cloning or using helper.
 
 h1. Configuration
 
